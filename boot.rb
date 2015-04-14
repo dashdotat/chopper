@@ -7,6 +7,7 @@ Bundler.require :default
 Dotenv.load
 
 DB = Sequel.connect(ENV['DATABASE_URL'])
+DB.extension(:pagination)
 
 require './lib/core_ext/string'
 require './lib/poller_config'

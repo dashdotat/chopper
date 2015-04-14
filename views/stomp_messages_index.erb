@@ -1,0 +1,5 @@
+<ul>
+<% @messages.each do |msg| %>
+  <li><%= msg.id %> - <%= msg.poller_config.message_processor_class %> &mdash; <a href="/admin/stomp_messages/<%= msg.id %>.json">View JSON</a> &mdash; <a href="/admin/stomp_messages/<%= msg.id %>">View Raw</a></li>
+<% end %>
+</ul>
