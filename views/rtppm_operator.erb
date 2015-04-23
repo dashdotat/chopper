@@ -18,10 +18,16 @@
         postUnits: '%'
       });
       function requestData(chart){
+        var startDate = new Date();
+        var endDate = new Date(startDate);
+        startDate.setHours( startDate.getHours() - 1 );
         $.ajax({
           type: 'GET',
           url: '/rtppm/<%= CGI::escape(@operator) %>/<%= CGI::escape(sector.sector) %>.json',
-          data: {},
+          data: {
+            start: parseInt(startDate.valueOf() / 1000),
+            end: parseInt(endDate.valueOf() / 1000)
+          },
           dataType: 'json',
           success: function(json){
             chart.setData(json);

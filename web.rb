@@ -10,8 +10,8 @@ class App < Roda
       r.get ':operator/:sector.json' do |operator,sector|
         @operator, @sector, @time_start, @time_end = [
           CGI::unescape(operator), CGI::unescape(sector), 
-          r['start'].nil? ? Time.now - (60*60) : Time.at(r['start']),
-          r['end'].nil? ? Time.now : Time.at(r['end'])
+          r['start'].nil? ? Time.now - (60*60) : Time.at(r['start'].to_i),
+          r['end'].nil? ? Time.now : Time.at(r['end'].to_i)
         ]
         response['Content-Type'] = 'application/json'
         Chopper::Rtppm.naked.where(:operator => @operator, :sector => @sector, :timestamp => @time_start..@time_end).order(:timestamp).select(:timestamp, :ppm, :rolling_ppm).to_a.to_json
