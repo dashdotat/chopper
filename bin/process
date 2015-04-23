@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+require File.join(File.dirname(__FILE__),'..','boot')
+
+while true do
+  Chopper::StompMessage.where(:processed => false, :archived => false).order(Sequel.asc(:timestamp)).each do |msg|
+    clazz = begin
+      msg.poller_config.message_processor_class.class_from_string
+    end
+    unless clazz.nil? || !clazz.singleton_methods.include?(:process)
+      clazz.process(JSON.parse(msg.message))
+      msg.update(:processed => true)
+      puts "[#{Time.now.utc}] Processed message with #{clazz.name}"
+    end
+  end
+  sleep 5
+end

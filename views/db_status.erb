@@ -1,0 +1,9 @@
+<ul>
+<% @sizes.each do |size| %>
+  <li><%= size[:relation] %> = <%= size[:total_size] %></li>
+<% end %>
+</ul>
+<ul>
+<li>Earliest STOMP message: <%= Chopper::StompMessage.order(Sequel.asc(:timestamp)).first.timestamp %></li>
+<li>Newest STOMP message: <%= Chopper::StompMessage.order(Sequel.desc(:timestamp)).first.timestamp %></li>
+</ul>

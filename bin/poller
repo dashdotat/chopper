@@ -31,7 +31,6 @@ module Chopper
           ],
           :connect_headers => client_headers
         }
-        puts client_hash.inspect
         client = Stomp::Client.new(client_hash)
 
         raise 'Connection failed' unless client.open?
@@ -44,7 +43,7 @@ module Chopper
           client.subscribe("/topic/#{poller.topic_name}", { 'id' => client.uuid(), 'ack' => 'client', 'activemq.subscriptionName' => Socket.gethostname + poller.topic_name }) do |msg|
             poller.add_stomp_message(:timestamp => Time.now.utc, :message => msg.body)
             client.acknowledge(msg, msg.headers)
-            puts "#{Time.now}: ACK #{poller.topic_name} message"
+            puts "[#{Time.now.utc}]: ACK #{poller.topic_name} message"
           end
         end
 
@@ -54,5 +53,17 @@ module Chopper
     end
   end
 end
-
-Chopper::Poller.new.run
+retry_time = 5
+begin
+  Chopper::Poller.new.run
+rescue => ex
+  Pony.mail(
+    :subject => "Poller error @ #{Time.now.utc} - #{ex.name}",
+    :body => ex.backtrace.join("\n")
+  )
+  if retry_time < 300
+    sleep(retry_time)
+    retry_time = retry_time * 1.5
+    retry
+  end
+end

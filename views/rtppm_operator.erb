@@ -1,0 +1,40 @@
+<h3>RTPPM for <%= @operator %> between <%= @time_start.strftime("%c") %> and <%= @time_end.strftime("%c") %></h3>
+<% @sectors.each do |sector| %>
+  <h4><%= sector.sector %></h4>
+  <% element = "chart_#{@operator.gsub(/\s/,'_').downcase}_#{sector.sector.gsub(/\s/,'_').downcase}" %>
+  <div id="<%= element %>" style="height: 250px;"></div>
+  <script type="text/javascript">
+    $(function(){
+
+      var graph = new Morris.Line({
+        element: '<%= element %>',
+        dateFormat: function (x) { return new Date(parseInt(x)).toString(); },
+        data: [
+        ],
+        xkey: 'timestamp',
+        ykeys: ['ppm','rolling_ppm'],
+        labels: ['PPM','Rolling PPM'],
+        parseTime: false,
+        postUnits: '%'
+      });
+      function requestData(chart){
+        $.ajax({
+          type: 'GET',
+          url: '/rtppm/<%= CGI::escape(@operator) %>/<%= CGI::escape(sector.sector) %>.json',
+          data: {},
+          dataType: 'json',
+          success: function(json){
+            chart.setData(json);
+          },
+          error: function(x,y,z) {
+            console.log(x.responseText);
+          },
+          complete: function() {
+            setTimeout(function(){requestData(chart)}, 30000);
+          }
+        });
+      }
+      requestData(graph);
+    });
+  </script>
+<% end %>

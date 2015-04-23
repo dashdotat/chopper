@@ -5,14 +5,14 @@ module Chopper
         ts = Time.at(msg['RTPPMDataMsgV1']['timestamp'].to_i / 1000)
         data = msg['RTPPMDataMsgV1']['RTPPMData']['NationalPage']['NationalPPM']
         Chopper::Rtppm.create(
-          :operator => 'National', :timestamp => ts,
+          :operator => 'National', :sector => 'All', :timestamp => ts,
           :total_trains => data['Total'], :ontime_trains => data['OnTime'], :late_trains => data['Late'], :cancelverylate_trains => data['CancelVeryLate'],
           :ppm_rag => data['PPM']['rag'], :ppm => data['PPM']['text'], :rolling_ppm_rag => data['RollingPPM']['rag'], :rolling_ppm => data['RollingPPM']['text']
         )
         msg['RTPPMDataMsgV1']['RTPPMData']['NationalPage']['Sector'].each do |sector|
           data = sector['SectorPPM']
           Chopper::Rtppm.create(
-            :operator => 'National', :sector => sector['sectorDesc'] == '' ? 'All' : sector['sectorDesc'], :timestamp => ts,
+            :operator => 'National', :sector => sector['sectorDesc'], :timestamp => ts,
             :total_trains => data['Total'], :ontime_trains => data['OnTime'], :late_trains => data['Late'], :cancelverylate_trains => data['CancelVeryLate'],
             :ppm_rag => data['PPM']['rag'], :ppm => data['PPM']['text'], :rolling_ppm_rag => data['RollingPPM']['rag'], :rolling_ppm => data['RollingPPM']['text']
           )
@@ -21,7 +21,7 @@ module Chopper
           data = operator['Operator']
           operator_name = operator['Operator']['name']
           Chopper::Rtppm.create(
-            :operator => operator_name, :timestamp => ts,
+            :operator => operator_name, :timestamp => ts, :sector => 'All',
             :total_trains => data['Total'], :ontime_trains => data['OnTime'], :late_trains => data['Late'], :cancelverylate_trains => data['CancelVeryLate'],
             :ppm_rag => data['PPM']['rag'], :ppm => data['PPM']['text'], :rolling_ppm_rag => data['RollingPPM']['rag'], :rolling_ppm => data['RollingPPM']['text']
           )
@@ -36,7 +36,7 @@ module Chopper
             operator.fetch('OprServiceGrp',[]).each do |sector|
               data = sector
               Chopper::Rtppm.create(
-                :operator => operator_name, :sector => data['name'], :timestamp => ts,
+                :operator => operator_name, :sector => data['name'].to_s == '' ? 'All' : data['name'], :timestamp => ts,
                 :total_trains => data['Total'], :ontime_trains => data['OnTime'], :late_trains => data['Late'], :cancelverylate_trains => data['CancelVeryLate'],
                 :ppm_rag => data['PPM']['rag'], :ppm => data['PPM']['text'], :rolling_ppm_rag => data['RollingPPM']['rag'], :rolling_ppm => data['RollingPPM']['text']
               )
